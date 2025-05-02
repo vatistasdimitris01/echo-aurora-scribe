@@ -29,21 +29,26 @@ export async function fetchGroqResponse(messages: ChatMessage[], apiKey: string)
   }
 }
 
-export async function fetchCartesiaTTS(text: string, apiKey: string, voiceId?: string): Promise<ArrayBuffer> {
+export async function fetchElevenLabsTTS(text: string, apiKey: string, voiceId?: string): Promise<ArrayBuffer> {
   try {
-    // Using an updated working voice ID from Cartesia's available voices
-    const voiceToUse = voiceId || "en-US-GuyNeural"; // Default to English voice if not specified
+    // Use a default ElevenLabs voice if none provided
+    const voiceToUse = voiceId || "pNInz6obpgDQGcFmaJgB"; // Default to Aria voice if not specified
     
-    const response = await fetch(`https://api.cartesia.ai/tts`, {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceToUse}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        "xi-api-key": apiKey
       },
       body: JSON.stringify({
         text: text,
-        voice: voiceToUse,
-        speed: 1.0
+        model_id: "eleven_multilingual_v2", // Using the multilingual model
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: 0.0,
+          use_speaker_boost: true
+        }
       })
     });
 
@@ -53,7 +58,7 @@ export async function fetchCartesiaTTS(text: string, apiKey: string, voiceId?: s
 
     return await response.arrayBuffer();
   } catch (error) {
-    console.error("Error fetching TTS from Cartesia:", error);
+    console.error("Error fetching TTS from ElevenLabs:", error);
     throw error;
   }
 }

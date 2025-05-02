@@ -2,12 +2,12 @@
 import { LanguageOption } from '@/types';
 
 export const supportedLanguages: LanguageOption[] = [
-  { code: 'en', name: 'English', voiceId: 'pNInz6obpgDQGcFmaJgB' },
-  { code: 'es', name: 'Español', voiceId: '29vD33N1CtxCmqQRPOHJ' },
-  { code: 'fr', name: 'Français', voiceId: 'BG2ZJXQdyHirGgPXGZPR' },
-  { code: 'de', name: 'Deutsch', voiceId: 'z9fAnlkpzviPz146aGWa' },
-  { code: 'zh', name: '中文', voiceId: 'Gp8iLp93qVg5pwZkHNTF' },
-  { code: 'ar', name: 'العربية', voiceId: 'LcNEW60QqPvKj17x8xOn' },
+  { code: 'en', name: 'English', voiceId: 'pNInz6obpgDQGcFmaJgB' }, // Aria
+  { code: 'es', name: 'Español', voiceId: '29vD33N1CtxCmqQRPOHJ' }, // Spanish voice
+  { code: 'fr', name: 'Français', voiceId: 'BG2ZJXQdyHirGgPXGZPR' }, // French voice
+  { code: 'de', name: 'Deutsch', voiceId: 'z9fAnlkpzviPz146aGWa' }, // German voice
+  { code: 'zh', name: '中文', voiceId: 'Gp8iLp93qVg5pwZkHNTF' }, // Chinese voice
+  { code: 'ar', name: 'العربية', voiceId: 'LcNEW60QqPvKj17x8xOn' }, // Arabic voice
 ];
 
 export const detectLanguage = (text: string): string => {

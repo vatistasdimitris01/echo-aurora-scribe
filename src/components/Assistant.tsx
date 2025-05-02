@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import LanguageSelector from './LanguageSelector';
 import { AssistantState, ChatMessage } from '@/types';
 import { 
   fetchGroqResponse, 
-  fetchCartesiaTTS, 
+  fetchElevenLabsTTS, 
   getUserLocation, 
   getWeatherData,
   enhanceUserPrompt,
@@ -23,7 +22,7 @@ import {
 
 // Predefined API keys
 const GROQ_API_KEY = "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";
-const CARTESIA_API_KEY = "sk_car_9i6vHEiEQxzkRVoku4gsMA";
+const ELEVENLABS_API_KEY = "sk_car_9i6vHEiEQxzkRVoku4gsMA"; // Using the same key for now
 
 const Assistant: React.FC = () => {
   const [state, setState] = useState<AssistantState>('idle');
@@ -183,10 +182,10 @@ const Assistant: React.FC = () => {
         setMessages([...enhancedMessages, { role: 'assistant', content: assistantResponse }]);
         
         // Get voice for detected language
-        const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
+        const voiceId = getVoiceIdForLanguage(langToUse);
         
         // Convert to speech and play
-        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
+        const audioData = await fetchElevenLabsTTS(assistantResponse, ELEVENLABS_API_KEY, voiceId);
         await playAudio(audioData);
       } 
       // Handle time requests
@@ -206,8 +205,8 @@ const Assistant: React.FC = () => {
         setResponse(assistantResponse);
         setMessages([...enhancedMessages, { role: 'assistant', content: assistantResponse }]);
         
-        const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
-        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
+        const voiceId = getVoiceIdForLanguage(langToUse);
+        const audioData = await fetchElevenLabsTTS(assistantResponse, ELEVENLABS_API_KEY, voiceId);
         await playAudio(audioData);
       }
       // Handle location requests
@@ -228,8 +227,8 @@ const Assistant: React.FC = () => {
         setResponse(assistantResponse);
         setMessages([...enhancedMessages, { role: 'assistant', content: assistantResponse }]);
         
-        const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
-        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
+        const voiceId = getVoiceIdForLanguage(langToUse);
+        const audioData = await fetchElevenLabsTTS(assistantResponse, ELEVENLABS_API_KEY, voiceId);
         await playAudio(audioData);
       }
       // Default response flow for general questions
@@ -245,14 +244,32 @@ const Assistant: React.FC = () => {
         setResponse(assistantResponse);
         setMessages([...enhancedMessages, { role: 'assistant', content: assistantResponse }]);
         
-        const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
-        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
+        const voiceId = getVoiceIdForLanguage(langToUse);
+        const audioData = await fetchElevenLabsTTS(assistantResponse, ELEVENLABS_API_KEY, voiceId);
         await playAudio(audioData);
       }
     } catch (error) {
       console.error('Error processing request:', error);
       setState('idle');
       toast.error('Error processing your request');
+    }
+  };
+  
+  // Helper function to map language code to ElevenLabs voice IDs
+  const getVoiceIdForLanguage = (langCode: string): string => {
+    switch (langCode) {
+      case 'es':
+        return "29vD33N1CtxCmqQRPOHJ"; // Spanish voice
+      case 'fr':
+        return "BG2ZJXQdyHirGgPXGZPR"; // French voice
+      case 'de':
+        return "z9fAnlkpzviPz146aGWa"; // German voice
+      case 'zh':
+        return "Gp8iLp93qVg5pwZkHNTF"; // Chinese voice
+      case 'ar':
+        return "LcNEW60QqPvKj17x8xOn"; // Arabic voice
+      default:
+        return "pNInz6obpgDQGcFmaJgB"; // Default English voice (Aria)
     }
   };
   
