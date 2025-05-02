@@ -31,9 +31,10 @@ export async function fetchGroqResponse(messages: ChatMessage[], apiKey: string)
 
 export async function fetchCartesiaTTS(text: string, apiKey: string, voiceId?: string): Promise<ArrayBuffer> {
   try {
-    const voiceToUse = voiceId || "pNInz6obpgDQGcFmaJgB"; // Default to English voice if not specified
+    // Using an updated working voice ID from Cartesia's available voices
+    const voiceToUse = voiceId || "en-US-GuyNeural"; // Default to English voice if not specified
     
-    const response = await fetch(`https://api.cartesia.ai/v1/text-to-speech/${voiceToUse}/stream`, {
+    const response = await fetch(`https://api.cartesia.ai/tts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,6 +42,7 @@ export async function fetchCartesiaTTS(text: string, apiKey: string, voiceId?: s
       },
       body: JSON.stringify({
         text: text,
+        voice: voiceToUse,
         speed: 1.0
       })
     });
