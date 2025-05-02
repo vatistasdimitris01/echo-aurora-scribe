@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -20,10 +21,11 @@ import {
   supportedLanguages 
 } from '@/utils/languageUtils';
 
+// Predefined API keys
+const GROQ_API_KEY = "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";
+const CARTESIA_API_KEY = "sk_car_9i6vHEiEQxzkRVoku4gsMA";
+
 const Assistant: React.FC = () => {
-  const [isApiKeySet, setIsApiKeySet] = useState<boolean>(false);
-  const [groqApiKey, setGroqApiKey] = useState<string>('');
-  const [cartesiaApiKey, setCartesiaApiKey] = useState<string>('');
   const [state, setState] = useState<AssistantState>('idle');
   const [isListening, setIsListening] = useState<boolean>(false);
   const [transcription, setTranscription] = useState<string>('');
@@ -145,11 +147,6 @@ const Assistant: React.FC = () => {
   
   const handleUserInput = async (input: string) => {
     try {
-      if (!groqApiKey || !cartesiaApiKey) {
-        toast.error('Please set both Groq and Cartesia API keys');
-        return;
-      }
-      
       // Detect language if different from selected
       const detectedLanguage = detectLanguage(input);
       const langToUse = detectedLanguage !== selectedLanguage ? detectedLanguage : selectedLanguage;
@@ -179,7 +176,7 @@ const Assistant: React.FC = () => {
         });
         
         // Get response from Groq
-        const assistantResponse = await fetchGroqResponse(enhancedMessages, groqApiKey);
+        const assistantResponse = await fetchGroqResponse(enhancedMessages, GROQ_API_KEY);
         
         // Update state and UI
         setResponse(assistantResponse);
@@ -189,7 +186,7 @@ const Assistant: React.FC = () => {
         const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
         
         // Convert to speech and play
-        const audioData = await fetchCartesiaTTS(assistantResponse, cartesiaApiKey, voiceId);
+        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
         await playAudio(audioData);
       } 
       // Handle time requests
@@ -205,12 +202,12 @@ const Assistant: React.FC = () => {
           content: getSystemPromptForLanguage(langToUse)
         });
         
-        const assistantResponse = await fetchGroqResponse(enhancedMessages, groqApiKey);
+        const assistantResponse = await fetchGroqResponse(enhancedMessages, GROQ_API_KEY);
         setResponse(assistantResponse);
         setMessages([...enhancedMessages, { role: 'assistant', content: assistantResponse }]);
         
         const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
-        const audioData = await fetchCartesiaTTS(assistantResponse, cartesiaApiKey, voiceId);
+        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
         await playAudio(audioData);
       }
       // Handle location requests
@@ -227,12 +224,12 @@ const Assistant: React.FC = () => {
           content: getSystemPromptForLanguage(langToUse)
         });
         
-        const assistantResponse = await fetchGroqResponse(enhancedMessages, groqApiKey);
+        const assistantResponse = await fetchGroqResponse(enhancedMessages, GROQ_API_KEY);
         setResponse(assistantResponse);
         setMessages([...enhancedMessages, { role: 'assistant', content: assistantResponse }]);
         
         const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
-        const audioData = await fetchCartesiaTTS(assistantResponse, cartesiaApiKey, voiceId);
+        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
         await playAudio(audioData);
       }
       // Default response flow for general questions
@@ -244,12 +241,12 @@ const Assistant: React.FC = () => {
           content: getSystemPromptForLanguage(langToUse)
         });
         
-        const assistantResponse = await fetchGroqResponse(enhancedMessages, groqApiKey);
+        const assistantResponse = await fetchGroqResponse(enhancedMessages, GROQ_API_KEY);
         setResponse(assistantResponse);
         setMessages([...enhancedMessages, { role: 'assistant', content: assistantResponse }]);
         
         const voiceId = supportedLanguages.find(lang => lang.code === langToUse)?.voiceId;
-        const audioData = await fetchCartesiaTTS(assistantResponse, cartesiaApiKey, voiceId);
+        const audioData = await fetchCartesiaTTS(assistantResponse, CARTESIA_API_KEY, voiceId);
         await playAudio(audioData);
       }
     } catch (error) {
@@ -263,100 +260,54 @@ const Assistant: React.FC = () => {
     setSelectedLanguage(language);
   };
 
-  const handleApiKeySave = () => {
-    if (!groqApiKey || !cartesiaApiKey) {
-      toast.error('Please enter both API keys');
-      return;
-    }
-    setIsApiKeySet(true);
-    toast.success('API keys saved successfully');
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
-      {!isApiKeySet ? (
-        <div className="w-full max-w-md space-y-6 glass-morphism p-6 rounded-xl">
-          <h2 className="text-2xl font-bold text-center">Set API Keys</h2>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="groqApiKey" className="block text-sm font-medium mb-1">
-                Groq API Key
-              </label>
-              <Input
-                id="groqApiKey"
-                type="password"
-                value={groqApiKey}
-                onChange={(e) => setGroqApiKey(e.target.value)}
-                placeholder="Enter your Groq API key"
-                className="w-full"
-              />
-            </div>
-            <div>
-              <label htmlFor="cartesiaApiKey" className="block text-sm font-medium mb-1">
-                Cartesia API Key
-              </label>
-              <Input
-                id="cartesiaApiKey"
-                type="password"
-                value={cartesiaApiKey}
-                onChange={(e) => setCartesiaApiKey(e.target.value)}
-                placeholder="Enter your Cartesia API key"
-                className="w-full"
-              />
-            </div>
-            <Button onClick={handleApiKeySave} className="w-full">
-              Save Keys
-            </Button>
+      <div className="w-full max-w-3xl flex flex-col items-center space-y-8">
+        <div className="absolute top-4 right-4">
+          <LanguageSelector
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={handleLanguageChange}
+          />
+        </div>
+        
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-24 h-24 relative flex items-center justify-center">
+            <AudioVisualizer state={state} />
+          </div>
+          
+          <div className="mt-4 text-center">
+            {state === 'idle' && !response && (
+              <p className="text-lg opacity-60">I'm here to help you. Ask me anything.</p>
+            )}
+            {state === 'listening' && (
+              <p className="text-lg font-medium animate-fade-in">
+                {transcription || "Listening..."}
+              </p>
+            )}
+            {state === 'processing' && (
+              <p className="text-lg font-medium animate-fade-in">Processing...</p>
+            )}
+            {(state === 'speaking' || (state === 'idle' && response)) && (
+              <p className="text-lg font-medium animate-fade-in">{response}</p>
+            )}
           </div>
         </div>
-      ) : (
-        <div className="w-full max-w-3xl flex flex-col items-center space-y-8">
-          <div className="absolute top-4 right-4">
-            <LanguageSelector
-              selectedLanguage={selectedLanguage}
-              onLanguageChange={handleLanguageChange}
-            />
-          </div>
-          
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-24 h-24 relative flex items-center justify-center">
-              <AudioVisualizer state={state} />
-            </div>
-            
-            <div className="mt-4 text-center">
-              {state === 'idle' && !response && (
-                <p className="text-lg opacity-60">I'm here to help you. Ask me anything.</p>
-              )}
-              {state === 'listening' && (
-                <p className="text-lg font-medium animate-fade-in">
-                  {transcription || "Listening..."}
-                </p>
-              )}
-              {state === 'processing' && (
-                <p className="text-lg font-medium animate-fade-in">Processing...</p>
-              )}
-              {(state === 'speaking' || (state === 'idle' && response)) && (
-                <p className="text-lg font-medium animate-fade-in">{response}</p>
-              )}
-            </div>
-          </div>
-          
-          <div className="w-full max-w-lg">
-            <AssistantInput
-              onInputSubmit={handleUserInput}
-              state={state}
-              isListening={isListening}
-              toggleListening={toggleListening}
-              placeholder={isListening ? "Listening..." : "Ask me anything..."}
-            />
-          </div>
-          
-          <div className="text-center text-sm text-gray-500 mt-8">
-            <p>A fast, intelligent voice assistant powered by</p>
-            <p className="font-medium">Groq, Cartesia</p>
-          </div>
+        
+        <div className="w-full max-w-lg">
+          <AssistantInput
+            onInputSubmit={handleUserInput}
+            state={state}
+            isListening={isListening}
+            toggleListening={toggleListening}
+            placeholder={isListening ? "Listening..." : "Ask me anything..."}
+          />
         </div>
-      )}
+        
+        <div className="text-center text-sm text-gray-500 mt-8">
+          <p>A fast, intelligent voice assistant powered by</p>
+          <p className="font-medium">Groq, Cartesia</p>
+        </div>
+      </div>
     </div>
   );
 };
